@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexi Travaux — Console d'Administration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        appleBg: '#FBFBFD',
+                        appleCard: '#FFFFFF',
+                        appleBorder: '#E5E7EB',
+                        appleText: '#1D1D1F',
+                        gold: {
+                            DEFAULT: '#C5A059',
+                            hover: '#B38F38',
+                            light: '#F4E8D1'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-appleBg text-appleText font-sans min-h-screen flex antialiased selection:bg-gold selection:text-white">
+
+    <!-- BARRE LATÉRALE CLAIRE -->
+    <aside id="admin-sidebar" class="hidden md:flex w-72 flex-col justify-between border-r border-appleBorder bg-white p-6 shadow-sm">
+        <div class="space-y-8">
+            <!-- LOGO FLEXI TRAVAUX -->
+            <div class="flex flex-col items-start gap-3 pb-6 border-b border-appleBorder">
+                <a href="../" target="_blank" class="block">
+                    <img src="../assets/images/logo.png" alt="Logo Flexi Travaux" class="h-16 w-auto object-contain" onerror="this.outerHTML='<span class=\'font-bold text-gold text-2xl\'>Flexi Travaux</span>'">
+                </a>
+                <div>
+                    <h2 class="text-xs font-bold text-appleText tracking-wider uppercase">Console d'Administration</h2>
+                    <p class="text-[11px] text-gold font-semibold uppercase tracking-widest">Éditeur Direct</p>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav class="space-y-1.5 text-xs font-medium">
+                <button onclick="switchTab('hero')" id="tab-btn-hero" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-gold text-white font-semibold shadow-md shadow-gold/20 transition-all text-left">
+                    <span> Accueil & Hero</span>
+                </button>
+                <button onclick="switchTab('services')" id="tab-btn-services" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-appleBg text-gray-600 hover:text-appleText transition-all text-left">
+                    <span> Prestations & Savoir-faire</span>
+                </button>
+                <button onclick="switchTab('avant-apres')" id="tab-btn-avant-apres" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-appleBg text-gray-600 hover:text-appleText transition-all text-left">
+                    <span> Comparateur Avant / Après</span>
+                </button>
+                <button onclick="switchTab('galerie')" id="tab-btn-galerie" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-appleBg text-gray-600 hover:text-appleText transition-all text-left">
+                    <span> Chantiers & Galeries</span>
+                </button>
+                <button onclick="switchTab('avis')" id="tab-btn-avis" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-appleBg text-gray-600 hover:text-appleText transition-all text-left">
+                    <span> Témoignages & Avis</span>
+                </button>
+                <button onclick="switchTab('contact')" id="tab-btn-contact" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-appleBg text-gray-600 hover:text-appleText transition-all text-left">
+                    <span> Coordonnées & Horaires</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="pt-6 border-t border-appleBorder space-y-3">
+            <a href="../" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-appleBorder text-xs text-gray-600 hover:text-gold hover:border-gold transition-all bg-appleBg font-medium">
+                Voir le site en direct ↗
+            </a>
+            <p class="text-[11px] text-center text-gray-400">Flexi Travaux — Version 2026</p>
+        </div>
+    </aside>
+
+    <!-- CONTENEUR PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-h-screen overflow-y-auto">
+        
+        <!-- HEADER TOP -->
+        <header class="sticky top-0 z-40 flex items-center justify-between border-b border-appleBorder bg-white/90 backdrop-blur-md px-8 py-5">
+            <div>
+                <h1 id="tab-title" class="text-base sm:text-lg font-bold text-appleText tracking-tight">Accueil & Hero Principal</h1>
+                <p class="text-xs text-gray-500">Modifications synchronisées avec le site vitrine.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="save-status" class="hidden text-xs text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full">
+                    ✓ Sauvegardé en temps réel !
+                </span>
+                <button onclick="saveAllData()" class="bg-gold hover:bg-gold-hover text-white text-xs font-semibold uppercase tracking-widest px-6 py-3 rounded-full transition-all shadow-md shadow-gold/20 hover:scale-[1.02] active:scale-95">
+                    Sauvegarder les modifications
+                </button>
+            </div>
+        </header>
+
+        <!-- AUTHENTIFICATION -->
+        <div id="auth-panel" class="flex-1 flex items-center justify-center p-6">
+            <div class="bg-white border border-appleBorder p-10 rounded-3xl max-w-sm w-full space-y-6 text-center shadow-xl">
+                <img src="../assets/images/logo.png" alt="Logo Flexi Travaux" class="h-14 mx-auto object-contain mb-2" onerror="this.outerHTML='<div class=\'w-14 h-14 rounded-2xl bg-gold/10 text-gold flex items-center justify-center mx-auto text-2xl font-bold\'>FT</div>'">
+                <div class="space-y-1">
+                    <h3 class="text-lg font-bold text-appleText">Espace Administration</h3>
+                    <p class="text-xs text-gray-500">Entrez votre mot de passe pour gérer le site.</p>
+                </div>
+                <input id="admin-pass" type="password" placeholder="Mot de passe" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold transition-colors text-center">
+                <button onclick="authenticate()" class="w-full bg-gold hover:bg-gold-hover text-white py-3.5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all shadow-md shadow-gold/20">
+                    Accéder à la console
+                </button>
+            </div>
+        </div>
+
+        <!-- ÉDITEUR GLOBAL -->
+        <main id="editor-container" class="hidden p-6 sm:p-10 max-w-5xl w-full mx-auto space-y-10">
+
+            <!-- 1. HERO -->
+            <section id="pane-hero" class="space-y-6">
+                <div class="bg-white border border-appleBorder p-7 sm:p-8 rounded-3xl space-y-6 shadow-sm">
+                    <div class="border-b border-appleBorder pb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">Textes & Bannière d'Accueil</h3>
+                        <p class="text-xs text-gray-500 mt-1">Personnalisez l'accroche, les badges et la photo principale du Hero.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Badge supérieur doré</label>
+                            <input id="inp-hero-badge" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Titre Principal</label>
+                            <input id="inp-hero-title" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Sous-titre / Descriptif technique</label>
+                            <textarea id="inp-hero-desc" rows="3" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Bouton Action 1 (Devis)</label>
+                            <input id="inp-hero-btndevis" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Bouton Action 2 (Chantiers)</label>
+                            <input id="inp-hero-btnchantiers" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-appleBorder space-y-3">
+                        <label class="block text-xs font-semibold text-gray-700">Photo d'arrière-plan du Hero</label>
+                        <div id="drop-hero-bg" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropSingle(event, 'inp-hero-bg', 'preview-hero')" class="border-2 border-dashed border-appleBorder rounded-2xl p-6 text-center hover:border-gold transition-colors cursor-pointer bg-appleBg/60">
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+                                <img id="preview-hero" src="" class="w-32 h-20 rounded-xl object-cover border border-appleBorder bg-gray-100 shadow-sm">
+                                <div class="space-y-1.5 text-center sm:text-left">
+                                    <p class="text-xs text-appleText font-medium">Glissez-déposez une image ici ou <span class="text-gold underline font-semibold">parcourez vos dossiers</span></p>
+                                    <p class="text-[11px] text-gray-400">JPG, PNG ou WEBP acceptés</p>
+                                </div>
+                            </div>
+                            <input type="file" accept="image/*" class="hidden" id="file-hero-bg" onchange="handleFileSelect(event, 'inp-hero-bg', 'preview-hero')">
+                        </div>
+                        <input id="inp-hero-bg" type="text" oninput="updatePreview('preview-hero', this.value)" class="w-full px-4 py-2 rounded-xl bg-appleBg border border-appleBorder text-xs text-gray-600 focus:text-appleText focus:outline-none focus:border-gold" placeholder="Chemin d'accès ou URL">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. PRESTATIONS & ENGAGEMENTS -->
+            <section id="pane-services" class="hidden space-y-8">
+                <div class="bg-white border border-appleBorder p-7 sm:p-8 rounded-3xl space-y-5 shadow-sm">
+                    <div class="border-b border-appleBorder pb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">4 Engagements & Chiffres Clés</h3>
+                        <p class="text-xs text-gray-500 mt-1">Bandeau de réassurance situé sous le Hero.</p>
+                    </div>
+                    <div id="stats-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">Cartes Prestations</h3>
+                        <p class="text-xs text-gray-500">Détails des corps d'état affichés sur la page d'accueil.</p>
+                    </div>
+                    <div id="services-list" class="space-y-6"></div>
+                </div>
+            </section>
+
+            <!-- 3. AVANT / APRÈS -->
+            <section id="pane-avant-apres" class="hidden space-y-6">
+                <div class="bg-white border border-appleBorder p-7 sm:p-8 rounded-3xl space-y-6 shadow-sm">
+                    <div class="border-b border-appleBorder pb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">Comparateur Visuel Moderne</h3>
+                        <p class="text-xs text-gray-500 mt-1">Modifiez les photos superposées révélées par le curseur.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Titre de la section</label>
+                            <input id="inp-ba-title" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Sous-titre explicatif</label>
+                            <input id="inp-ba-subtitle" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                        <div class="space-y-3">
+                            <label class="block text-xs font-semibold text-gray-700">Photo "AVANT"</label>
+                            <div id="drop-ba-before" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropSingle(event, 'inp-ba-before', 'preview-before')" class="border-2 border-dashed border-appleBorder rounded-2xl p-5 text-center hover:border-gold transition-colors cursor-pointer bg-appleBg/60">
+                                <img id="preview-before" src="" class="w-full h-40 rounded-xl object-cover border border-appleBorder bg-gray-100 mb-3 shadow-sm">
+                                <p class="text-xs text-appleText font-medium">Glisser l'image ou <span class="text-gold underline">parcourir</span></p>
+                                <input type="file" accept="image/*" class="hidden" id="file-ba-before" onchange="handleFileSelect(event, 'inp-ba-before', 'preview-before')">
+                            </div>
+                            <input id="inp-ba-before" type="text" oninput="updatePreview('preview-before', this.value)" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-xs text-gray-600 focus:text-appleText focus:outline-none focus:border-gold" placeholder="Chemin ou URL">
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-xs font-semibold text-gray-700">Photo "APRÈS"</label>
+                            <div id="drop-ba-after" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropSingle(event, 'inp-ba-after', 'preview-after')" class="border-2 border-dashed border-appleBorder rounded-2xl p-5 text-center hover:border-gold transition-colors cursor-pointer bg-appleBg/60">
+                                <img id="preview-after" src="" class="w-full h-40 rounded-xl object-cover border border-appleBorder bg-gray-100 mb-3 shadow-sm">
+                                <p class="text-xs text-appleText font-medium">Glisser l'image ou <span class="text-gold underline">parcourir</span></p>
+                                <input type="file" accept="image/*" class="hidden" id="file-ba-after" onchange="handleFileSelect(event, 'inp-ba-after', 'preview-after')">
+                            </div>
+                            <input id="inp-ba-after" type="text" oninput="updatePreview('preview-after', this.value)" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-xs text-gray-600 focus:text-appleText focus:outline-none focus:border-gold" placeholder="Chemin ou URL">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. CHANTIERS & GALERIES (AVEC DRAG & DROP D'IMAGES) -->
+            <section id="pane-galerie" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">Chantiers du Portfolio & Galeries Dédiées</h3>
+                        <p class="text-xs text-gray-500">Ajoutez, classez et glissez-déposez l'ordre des photos pour chaque galerie intérieure.</p>
+                    </div>
+                    <button onclick="addProjectCard()" class="bg-gold hover:bg-gold-hover text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-md shadow-gold/20">
+                        + Ajouter un chantier
+                    </button>
+                </div>
+
+                <div id="projects-container" class="space-y-8"></div>
+            </section>
+
+            <!-- 5. AVIS CLIENTS -->
+            <section id="pane-avis" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">Témoignages & Avis Clients</h3>
+                        <p class="text-xs text-gray-500">Glissez-déposez les cartes par ⠿ ou cliquez sur les flèches pour modifier l'ordre d'affichage.</p>
+                    </div>
+                    <button onclick="addTestimonialCard()" class="bg-gold hover:bg-gold-hover text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-md shadow-gold/20">
+                        + Ajouter un avis
+                    </button>
+                </div>
+
+                <div id="testimonials-container" class="space-y-4"></div>
+            </section>
+
+            <!-- 6. CONTACT -->
+            <section id="pane-contact" class="hidden space-y-6">
+                <div class="bg-white border border-appleBorder p-7 sm:p-8 rounded-3xl space-y-6 shadow-sm">
+                    <div class="border-b border-appleBorder pb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gold">Coordonnées Publiques & Footer</h3>
+                        <p class="text-xs text-gray-500 mt-1">Numéro, adresse de messagerie et horaires d'ouverture.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Numéro de téléphone</label>
+                            <input id="inp-phone" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Adresse e-mail</label>
+                            <input id="inp-email" type="email" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Horaires affichés</label>
+                            <input id="inp-hours" type="text" class="w-full px-4 py-3 rounded-xl bg-appleBg border border-appleBorder text-appleText text-sm focus:outline-none focus:border-gold">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        let appData = null;
+        let draggedReviewIndex = null;
+        let draggedGalleryItem = { pIdx: null, iIdx: null };
+
+        function authenticate() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === 'flexi2026') {
+                document.getElementById('auth-panel').classList.add('hidden');
+                document.getElementById('editor-container').classList.remove('hidden');
+                initForm();
+            } else {
+                alert('Mot de passe incorrect.');
+            }
+        }
+
+        async function initForm() {
+            const local = localStorage.getItem('flexi_live_data');
+            if (local) {
+                try {
+                    appData = JSON.parse(local);
+                } catch(e) {
+                    appData = null;
+                }
+            }
+            if (!appData) {
+                try {
+                    const res = await fetch('../content/site-data.json');
+                    appData = await res.json();
+                } catch(e) {
+                    console.error('Erreur chargement json', e);
+                }
+            }
+
+            setupClickableDropzone('drop-hero-bg', 'file-hero-bg');
+            setupClickableDropzone('drop-ba-before', 'file-ba-before');
+            setupClickableDropzone('drop-ba-after', 'file-ba-after');
+
+            populateForm();
+        }
+
+        function setupClickableDropzone(dropId, fileInputId) {
+            const dropzone = document.getElementById(dropId);
+            const fileInput = document.getElementById(fileInputId);
+            if (dropzone && fileInput) {
+                dropzone.onclick = () => fileInput.click();
+            }
+        }
+
+        function populateForm() {
+            if (!appData) return;
+
+            // Hero
+            document.getElementById('inp-hero-badge').value = appData.hero.badge;
+            document.getElementById('inp-hero-title').value = appData.hero.title;
+            document.getElementById('inp-hero-desc').value = appData.hero.desc;
+            document.getElementById('inp-hero-btndevis').value = appData.hero.btnDevis || "Demander un devis gratuit";
+            document.getElementById('inp-hero-btnchantiers').value = appData.hero.btnChantiers || "Consulter nos chantiers";
+            document.getElementById('inp-hero-bg').value = appData.hero.bgImage;
+            updatePreview('preview-hero', appData.hero.bgImage);
+
+            // Stats
+            renderStats();
+
+            // Services
+            renderServices();
+
+            // Avant / Après
+            document.getElementById('inp-ba-title').value = appData.beforeAfter.title;
+            document.getElementById('inp-ba-subtitle').value = appData.beforeAfter.subtitle;
+            document.getElementById('inp-ba-before').value = appData.beforeAfter.beforeImg;
+            document.getElementById('inp-ba-after').value = appData.beforeAfter.afterImg;
+            updatePreview('preview-before', appData.beforeAfter.beforeImg);
+            updatePreview('preview-after', appData.beforeAfter.afterImg);
+
+            // Galeries
+            renderProjectsAdmin();
+
+            // Avis
+            renderTestimonialsAdmin();
+
+            // Contact
+            document.getElementById('inp-phone').value = appData.contact.phone;
+            document.getElementById('inp-email').value = appData.contact.email || "contact@flexitravaux.fr";
+            document.getElementById('inp-hours').value = appData.contact.hours;
+        }
+
+        function renderStats() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = '';
+            appData.stats.forEach((st, idx) => {
+                const b = document.createElement('div');
+                b.className = 'bg-appleBg p-4 rounded-2xl border border-appleBorder space-y-2';
+                b.innerHTML = `
+                    <label class="block text-[11px] text-gold font-bold uppercase">Engagement #${idx + 1}</label>
+                    <input type="text" value="${st.val}" oninput="appData.stats[${idx}].val = this.value" class="w-full bg-white border border-appleBorder px-3 py-1.5 rounded-lg text-sm font-bold text-appleText mb-1">
+                    <input type="text" value="${st.label}" oninput="appData.stats[${idx}].label = this.value" class="w-full bg-white border border-appleBorder px-2.5 py-1 rounded-lg text-xs text-gray-600">
+                `;
+                container.appendChild(b);
+            });
+        }
+
+        function renderServices() {
+            const container = document.getElementById('services-list');
+            container.innerHTML = '';
+            appData.services.forEach((s, idx) => {
+                const box = document.createElement('div');
+                box.className = 'bg-white border border-appleBorder p-7 rounded-3xl space-y-4 shadow-sm';
+                box.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-appleBorder pb-3">
+                        <span class="text-xs font-bold text-gold uppercase tracking-wider">Prestation ${s.num}</span>
+                        <input type="text" value="${s.title}" oninput="appData.services[${idx}].title = this.value" class="bg-appleBg border border-appleBorder px-3 py-1.5 rounded-xl text-sm font-bold text-appleText">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Description principale</label>
+                        <textarea rows="2" oninput="appData.services[${idx}].desc = this.value" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-sm text-appleText">${s.desc}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Puces descriptives (séparées par une virgule)</label>
+                        <input type="text" value="${s.items.join(', ')}" oninput="appData.services[${idx}].items = this.value.split(',').map(t => t.trim())" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-xs text-gray-700">
+                    </div>
+                `;
+                container.appendChild(box);
+            });
+        }
+
+        function renderProjectsAdmin() {
+            const pCont = document.getElementById('projects-container');
+            pCont.innerHTML = '';
+
+            appData.projects.forEach((p, pIdx) => {
+                const pBox = document.createElement('div');
+                pBox.className = 'bg-white border border-appleBorder p-7 sm:p-8 rounded-3xl space-y-5 shadow-sm';
+
+                pBox.innerHTML = `
+                    <div class="flex items-start justify-between gap-4 border-b border-appleBorder pb-4">
+                        <div class="space-y-1">
+                            <span class="text-xs text-gold uppercase font-bold tracking-wider">Chantier #${pIdx + 1}</span>
+                            <div class="flex items-center gap-3">
+                                <input type="text" value="${p.title}" oninput="appData.projects[${pIdx}].title = this.value" class="bg-appleBg border border-appleBorder px-3 py-1.5 rounded-xl text-base font-bold text-appleText">
+                                <input type="text" value="${p.category}" oninput="appData.projects[${pIdx}].category = this.value" class="bg-appleBg border border-appleBorder px-2.5 py-1 rounded-xl text-xs text-gold font-semibold">
+                            </div>
+                        </div>
+                        <button onclick="removeProject(${pIdx})" class="text-xs text-rose-600 hover:text-rose-700 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 font-medium">Supprimer ce chantier</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700">Vignette principale (Carte portfolio)</label>
+                            <div id="drop-p-${pIdx}" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleProjectThumbDrop(event, ${pIdx})" class="border-2 border-dashed border-appleBorder rounded-2xl p-4 text-center hover:border-gold transition-colors cursor-pointer bg-appleBg/60 flex items-center gap-4">
+                                <img id="preview-p-${pIdx}" src="${p.thumb.startsWith('.') ? '../' + p.thumb : p.thumb}" class="w-20 h-16 rounded-xl object-cover bg-gray-100 border border-appleBorder" onerror="this.src='https://via.placeholder.com/80'">
+                                <div class="text-left text-xs">
+                                    <p class="text-appleText font-medium">Glissez une image ici</p>
+                                    <span class="text-gold underline text-[11px] font-semibold">ou parcourez vos dossiers</span>
+                                </div>
+                                <input type="file" accept="image/*" class="hidden" id="file-p-${pIdx}" onchange="handleProjectThumbSelect(event, ${pIdx})">
+                            </div>
+                            <input type="text" value="${p.thumb}" oninput="appData.projects[${pIdx}].thumb = this.value; updatePreview('preview-p-${pIdx}', this.value)" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-xs text-gray-700">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700">Description détaillée du chantier</label>
+                            <textarea rows="4" oninput="appData.projects[${pIdx}].description = this.value" class="w-full px-4 py-3 rounded-2xl bg-appleBg border border-appleBorder text-xs text-appleText focus:outline-none focus:border-gold">${p.description}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- GALERIE PLEIN ÉCRAN -->
+                    <div class="pt-4 border-t border-appleBorder space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-appleText">Photos de la galerie dédiée (${p.images.length})</h4>
+                                <p class="text-[11px] text-gray-500">Glissez-déposez les cartes par ⠿ ou cliquez sur les flèches pour définir l'ordre d'affichage.</p>
+                            </div>
+                            <label class="bg-gold/15 hover:bg-gold/25 text-gold border border-gold/30 text-xs font-semibold px-3 py-1.5 rounded-xl cursor-pointer transition-all">
+                                + Parcourir & ajouter
+                                <input type="file" accept="image/*" multiple class="hidden" onchange="handleAddGalleryImages(event, ${pIdx})">
+                            </label>
+                        </div>
+
+                        <!-- ZONE DROP MULTIPLE -->
+                        <div ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMultipleGallery(event, ${pIdx})" class="border-2 border-dashed border-appleBorder rounded-2xl p-4 text-center bg-appleBg/50 hover:border-gold transition-colors">
+                            <p class="text-xs text-gray-600 font-medium">Glissez-déposez plusieurs photos ici pour les insérer dans cette galerie</p>
+                        </div>
+
+                        <!-- LISTE DE PHOTOS AVEC DRAG & DROP D'ORDRE -->
+                        <div id="gallery-items-container-${pIdx}" class="space-y-2.5"></div>
+                    </div>
+                `;
+                pCont.appendChild(pBox);
+
+                // Instancie la liste réorganisable des images pour ce projet
+                renderGalleryItems(pIdx);
+
+                setupClickableDropzone(`drop-p-${pIdx}`, `file-p-${pIdx}`);
+            });
+        }
+
+        function renderGalleryItems(pIdx) {
+            const container = document.getElementById(`gallery-items-container-${pIdx}`);
+            if (!container) return;
+            container.innerHTML = '';
+
+            const p = appData.projects[pIdx];
+
+            p.images.forEach((img, iIdx) => {
+                const itemBox = document.createElement('div');
+                itemBox.className = 'flex items-center gap-3 bg-appleBg p-3 rounded-2xl border border-appleBorder cursor-move transition-all';
+                itemBox.draggable = true;
+
+                // Drag & Drop pour réordonner les photos de la galerie
+                itemBox.addEventListener('dragstart', (e) => {
+                    draggedGalleryItem = { pIdx, iIdx };
+                    e.dataTransfer.effectAllowed = 'move';
+                    itemBox.classList.add('opacity-40', 'border-gold');
+                });
+
+                itemBox.addEventListener('dragend', () => {
+                    itemBox.classList.remove('opacity-40', 'border-gold');
+                });
+
+                itemBox.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    itemBox.classList.add('border-gold');
+                });
+
+                itemBox.addEventListener('dragleave', () => {
+                    itemBox.classList.remove('border-gold');
+                });
+
+                itemBox.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    itemBox.classList.remove('border-gold');
+                    if (draggedGalleryItem.pIdx === pIdx && draggedGalleryItem.iIdx !== null && draggedGalleryItem.iIdx !== iIdx) {
+                        const moved = p.images.splice(draggedGalleryItem.iIdx, 1)[0];
+                        p.images.splice(iIdx, 0, moved);
+                        renderGalleryItems(pIdx);
+                    }
+                });
+
+                itemBox.innerHTML = `
+                    <span class="text-gray-400 font-bold select-none text-base cursor-grab" title="Glisser pour changer la position">⠿</span>
+                    <img src="${img.src.startsWith('.') ? '../' + img.src : img.src}" class="w-16 h-12 rounded-xl object-cover bg-gray-100 border border-appleBorder flex-shrink-0" onerror="this.src='https://via.placeholder.com/80'">
+                    <div class="flex-1 space-y-1">
+                        <input type="text" value="${img.label}" oninput="appData.projects[${pIdx}].images[${iIdx}].label = this.value" placeholder="Légende de la photo" class="w-full bg-white border border-appleBorder px-2.5 py-1 rounded-lg text-xs text-appleText">
+                        <input type="text" value="${img.src}" oninput="appData.projects[${pIdx}].images[${iIdx}].src = this.value" placeholder="Chemin de l'image" class="w-full bg-transparent text-[11px] text-gray-400 focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="moveGalleryImage(${pIdx}, ${iIdx}, -1)" ${iIdx === 0 ? 'disabled class="text-gray-300 text-xs px-2 py-1"' : 'class="text-gray-600 hover:text-gold text-xs px-2 py-1 border border-appleBorder rounded-lg bg-white"'} title="Monter">↑</button>
+                        <button onclick="moveGalleryImage(${pIdx}, ${iIdx}, 1)" ${iIdx === p.images.length - 1 ? 'disabled class="text-gray-300 text-xs px-2 py-1"' : 'class="text-gray-600 hover:text-gold text-xs px-2 py-1 border border-appleBorder rounded-lg bg-white"'} title="Descendre">↓</button>
+                        <button onclick="removeGalleryImage(${pIdx}, ${iIdx})" class="text-xs text-rose-500 hover:text-rose-700 px-2 py-1 font-medium ml-1">Supprimer</button>
+                    </div>
+                `;
+                container.appendChild(itemBox);
+            });
+        }
+
+        function moveGalleryImage(pIdx, iIdx, direction) {
+            const p = appData.projects[pIdx];
+            const newIndex = iIdx + direction;
+            if (newIndex < 0 || newIndex >= p.images.length) return;
+            const moved = p.images.splice(iIdx, 1)[0];
+            p.images.splice(newIndex, 0, moved);
+            renderGalleryItems(pIdx);
+        }
+
+        function addProjectCard() {
+            const newId = 'chantier-' + (appData.projects.length + 1);
+            appData.projects.unshift({
+                id: newId,
+                category: 'Gros Œuvre',
+                title: 'Nouveau Chantier',
+                thumb: './assets/images/chantier-1.jpg',
+                description: 'Description détaillée des travaux réalisés.',
+                images: [{ src: './assets/images/chantier-1.jpg', label: 'Vue principale' }]
+            });
+            renderProjectsAdmin();
+        }
+
+        function removeProject(idx) {
+            if (confirm('Supprimer définitivement ce chantier ?')) {
+                appData.projects.splice(idx, 1);
+                renderProjectsAdmin();
+            }
+        }
+
+        function removeGalleryImage(pIdx, iIdx) {
+            appData.projects[pIdx].images.splice(iIdx, 1);
+            renderGalleryItems(pIdx);
+        }
+
+        // AVIS & TÉMOIGNAGES
+        function renderTestimonialsAdmin() {
+            if (!appData.testimonials) appData.testimonials = [];
+            const tCont = document.getElementById('testimonials-container');
+            tCont.innerHTML = '';
+
+            appData.testimonials.forEach((t, idx) => {
+                const tBox = document.createElement('div');
+                tBox.className = 'bg-white border border-appleBorder p-5 rounded-2xl space-y-3 cursor-move transition-all shadow-sm';
+                tBox.draggable = true;
+                tBox.dataset.index = idx;
+
+                tBox.addEventListener('dragstart', (e) => {
+                    draggedReviewIndex = idx;
+                    e.dataTransfer.effectAllowed = 'move';
+                    tBox.classList.add('opacity-40', 'border-gold');
+                });
+
+                tBox.addEventListener('dragend', () => {
+                    tBox.classList.remove('opacity-40', 'border-gold');
+                });
+
+                tBox.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    tBox.classList.add('border-gold');
+                });
+
+                tBox.addEventListener('dragleave', () => {
+                    tBox.classList.remove('border-gold');
+                });
+
+                tBox.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    tBox.classList.remove('border-gold');
+                    const targetIndex = parseInt(tBox.dataset.index);
+                    if (draggedReviewIndex !== null && draggedReviewIndex !== targetIndex) {
+                        const movedItem = appData.testimonials.splice(draggedReviewIndex, 1)[0];
+                        appData.testimonials.splice(targetIndex, 0, movedItem);
+                        renderTestimonialsAdmin();
+                    }
+                });
+
+                tBox.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-appleBorder pb-2.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-400 font-bold select-none text-base cursor-grab" title="Glisser pour déplacer">⠿</span>
+                            <span class="text-xs font-bold text-gold">Position #${idx + 1}</span>
+                            <input type="text" value="${t.stars || '★★★★★'}" oninput="appData.testimonials[${idx}].stars = this.value" class="bg-appleBg border border-appleBorder px-2 py-0.5 rounded text-xs text-gold w-24">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="moveReview(${idx}, -1)" ${idx === 0 ? 'disabled class="text-gray-300 text-xs px-2 py-1"' : 'class="text-gray-600 hover:text-gold text-xs px-2 py-1 border border-appleBorder rounded-lg bg-appleBg"'} title="Monter">↑</button>
+                            <button onclick="moveReview(${idx}, 1)" ${idx === appData.testimonials.length - 1 ? 'disabled class="text-gray-300 text-xs px-2 py-1"' : 'class="text-gray-600 hover:text-gold text-xs px-2 py-1 border border-appleBorder rounded-lg bg-appleBg"'} title="Descendre">↓</button>
+                            <button onclick="removeReview(${idx})" class="text-xs text-rose-600 hover:text-rose-800 ml-2 font-medium">Supprimer</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <label class="block text-gray-500 mb-1 font-semibold">Nom du client</label>
+                            <input type="text" value="${t.name}" oninput="appData.testimonials[${idx}].name = this.value" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-appleText font-semibold">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-gray-500 mb-1 font-semibold">Texte de l'avis</label>
+                            <textarea rows="2" oninput="appData.testimonials[${idx}].text = this.value" class="w-full px-3 py-2 rounded-xl bg-appleBg border border-appleBorder text-appleText resize-none">${t.text}</textarea>
+                        </div>
+                    </div>
+                `;
+                tCont.appendChild(tBox);
+            });
+        }
+
+        function moveReview(idx, direction) {
+            const newIndex = idx + direction;
+            if (newIndex < 0 || newIndex >= appData.testimonials.length) return;
+            const item = appData.testimonials.splice(idx, 1)[0];
+            appData.testimonials.splice(newIndex, 0, item);
+            renderTestimonialsAdmin();
+        }
+
+        function addTestimonialCard() {
+            if (!appData.testimonials) appData.testimonials = [];
+            appData.testimonials.unshift({
+                name: 'Nouveau Client',
+                stars: '★★★★★',
+                text: 'Travail soigné, professionnel et respect des délais. Je recommande vivement Flexi Travaux.'
+            });
+            renderTestimonialsAdmin();
+        }
+
+        function removeReview(idx) {
+            if (confirm('Supprimer cet avis ?')) {
+                appData.testimonials.splice(idx, 1);
+                renderTestimonialsAdmin();
+            }
+        }
+
+        // GESTION DRAG & DROP ET FICHIERS LOCAUX
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('border-gold');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('border-gold');
+        }
+
+        function handleDropSingle(e, inputId, previewId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-gold');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                const file = e.dataTransfer.files[0];
+                readFileAsBase64(file, (base64) => {
+                    document.getElementById(inputId).value = base64;
+                    updatePreview(previewId, base64);
+                });
+            }
+        }
+
+        function handleFileSelect(e, inputId, previewId) {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                readFileAsBase64(file, (base64) => {
+                    document.getElementById(inputId).value = base64;
+                    updatePreview(previewId, base64);
+                });
+            }
+        }
+
+        function handleProjectThumbDrop(e, pIdx) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-gold');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                readFileAsBase64(e.dataTransfer.files[0], (base64) => {
+                    appData.projects[pIdx].thumb = base64;
+                    renderProjectsAdmin();
+                });
+            }
+        }
+
+        function handleProjectThumbSelect(e, pIdx) {
+            if (e.target.files && e.target.files[0]) {
+                readFileAsBase64(e.target.files[0], (base64) => {
+                    appData.projects[pIdx].thumb = base64;
+                    renderProjectsAdmin();
+                });
+            }
+        }
+
+        function handleDropMultipleGallery(e, pIdx) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-gold');
+            if (e.dataTransfer.files) {
+                Array.from(e.dataTransfer.files).forEach(file => {
+                    readFileAsBase64(file, (base64) => {
+                        appData.projects[pIdx].images.push({
+                            src: base64,
+                            label: 'Chantier — ' + file.name.split('.')[0]
+                        });
+                        renderGalleryItems(pIdx);
+                    });
+                });
+            }
+        }
+
+        function handleAddGalleryImages(e, pIdx) {
+            if (e.target.files) {
+                Array.from(e.target.files).forEach(file => {
+                    readFileAsBase64(file, (base64) => {
+                        appData.projects[pIdx].images.push({
+                            src: base64,
+                            label: 'Photo ' + (appData.projects[pIdx].images.length + 1)
+                        });
+                        renderGalleryItems(pIdx);
+                    });
+                });
+            }
+        }
+
+        function readFileAsBase64(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                callback(evt.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updatePreview(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.src = val.startsWith('.') ? '../' + val : val;
+        }
+
+        function switchTab(name) {
+            const tabs = ['hero', 'services', 'avant-apres', 'galerie', 'avis', 'contact'];
+            tabs.forEach(t => {
+                document.getElementById('pane-' + t).classList.add('hidden');
+                const btn = document.getElementById('tab-btn-' + t);
+                btn.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-appleBg text-gray-600 hover:text-appleText transition-all text-left';
+            });
+
+            document.getElementById('pane-' + name).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-btn-' + name);
+            activeBtn.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-gold text-white font-semibold shadow-md shadow-gold/20 transition-all text-left';
+
+            const titles = {
+                'hero': "Accueil & Hero Principal",
+                'services': "Prestations & Engagements",
+                'avant-apres': "Comparateur Avant / Après",
+                'galerie': "Chantiers & Galeries Dédiées",
+                'avis': "Témoignages & Avis Clients",
+                'contact': "Coordonnées & Horaires"
+            };
+            document.getElementById('tab-title').innerText = titles[name];
+        }
+
+        function saveAllData() {
+            appData.hero.badge = document.getElementById('inp-hero-badge').value;
+            appData.hero.title = document.getElementById('inp-hero-title').value;
+            appData.hero.desc = document.getElementById('inp-hero-desc').value;
+            appData.hero.btnDevis = document.getElementById('inp-hero-btndevis').value;
+            appData.hero.btnChantiers = document.getElementById('inp-hero-btnchantiers').value;
+            appData.hero.bgImage = document.getElementById('inp-hero-bg').value;
+
+            appData.beforeAfter.title = document.getElementById('inp-ba-title').value;
+            appData.beforeAfter.subtitle = document.getElementById('inp-ba-subtitle').value;
+            appData.beforeAfter.beforeImg = document.getElementById('inp-ba-before').value;
+            appData.beforeAfter.afterImg = document.getElementById('inp-ba-after').value;
+
+            appData.contact.phone = document.getElementById('inp-phone').value;
+            appData.contact.email = document.getElementById('inp-email').value;
+            appData.contact.hours = document.getElementById('inp-hours').value;
+
+            localStorage.setItem('flexi_live_data', JSON.stringify(appData));
+
+            const status = document.getElementById('save-status');
+            status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 3500);
+        }
+    </script>
+
+</body>
+</html>
